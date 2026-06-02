@@ -69,6 +69,7 @@ export default function ProfilePage() {
 
   // Available currencies
   const currencies = [
+    { code: 'IDR', name: 'Indonesian Rupiah (Rp)', symbol: 'Rp' },
     { code: 'USD', name: 'US Dollar ($)', symbol: '$' },
     { code: 'EUR', name: 'Euro (€)', symbol: '€' },
     { code: 'GBP', name: 'British Pound (£)', symbol: '£' },

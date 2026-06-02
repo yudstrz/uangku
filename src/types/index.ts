@@ -60,12 +60,12 @@ export interface MonthlyReport {
 }
 
 // Helper function to format currency
-export const formatCurrency = (amount: number, currency: string = 'LKR') => {
+export const formatCurrency = (amount: number, currency: string = 'IDR') => {
   const currencyCode = localStorage.getItem('preferredCurrency') || currency;
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: currencyCode,
+    minimumFractionDigits: 0,
   }).format(amount);
-
 };
 

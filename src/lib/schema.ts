@@ -10,7 +10,7 @@ const SCHEMA_STATEMENTS = [
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        preferredCurrency TEXT NOT NULL DEFAULT 'LKR',
+        preferredCurrency TEXT NOT NULL DEFAULT 'IDR',
         isDarkMode INTEGER NOT NULL DEFAULT 0,
         createdAt TEXT NOT NULL DEFAULT (datetime('now')),
         updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
