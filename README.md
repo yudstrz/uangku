@@ -1,4 +1,4 @@
-# Finance Tracker
+# uangku - your finance tracker
 
 A personal finance manager built with Next.js that helps you track your income, expenses, and financial goals. This project was created for learning Next.js and is not intended for production use with real financial data.
 

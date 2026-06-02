@@ -31,7 +31,7 @@ function setInitialColorMode() {
 }
 
 export const metadata: Metadata = {
-  title: "Finance Tracker | Personal Financial Manager",
+  title: "uangku - your finance tracker",
   description: "Track your income, expenses, and financial goals with our simple and intuitive finance tracker.",
 };
 

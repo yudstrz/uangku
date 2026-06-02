@@ -39,9 +39,14 @@ export default function Navigation() {
           className="flex items-center mb-5 px-2 py-4"
         >
           <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
-          <span className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
-            Finance Tracker
-          </span>
+          <div className="flex flex-col ml-3">
+            <span className="text-xl font-bold text-gray-900 dark:text-white leading-none">
+              uangku
+            </span>
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+              your finance tracker
+            </span>
+          </div>
         </Link>
         <nav className="flex-1 space-y-1">
           {navigation.map((item) => {
