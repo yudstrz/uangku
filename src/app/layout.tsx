@@ -1,9 +1,11 @@
 
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./Providers";
+import PWARegistration from "@/components/PWARegistration";
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +35,19 @@ function setInitialColorMode() {
 export const metadata: Metadata = {
   title: "uangku - your finance tracker",
   description: "Track your income, expenses, and financial goals with our simple and intuitive finance tracker.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "uangku",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#16a34a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -48,6 +63,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased min-h-screen bg-gray-50 dark:bg-gray-900`}
       >
+        <PWARegistration />
         <Providers>
           {children}
         </Providers>
