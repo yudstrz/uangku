@@ -1,6 +1,6 @@
 import { execute } from "@/lib/turso";
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
     const { password, token } = await request.json();

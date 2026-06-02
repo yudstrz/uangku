@@ -1,6 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials"
 import { execute } from "@/lib/turso"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import type { NextAuthOptions } from "next-auth"
 import type { DefaultSession, DefaultUser } from "next-auth"
 
@@ -87,8 +87,11 @@ export const authOptions: NextAuthOptions = {
                 token.remember = user.remember
             }
 
+            // Set token expiry based on remember preference
             if (token.remember) {
-                token.exp = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+                token.maxAge = 30 * 24 * 60 * 60 // 30 days
+            } else if (!token.maxAge) {
+                token.maxAge = 24 * 60 * 60 // 1 day
             }
 
             return token
@@ -99,19 +102,14 @@ export const authOptions: NextAuthOptions = {
                     session.user.id = typeof token.id === "string" ? token.id : String(token.id)
                     session.user.preferredCurrency = typeof token.preferredCurrency === "string" ? token.preferredCurrency : undefined
                     session.user.isDarkMode = typeof token.isDarkMode === "boolean" ? token.isDarkMode : undefined
-                    if (typeof token.exp === "number") {
-                        session.expires = new Date(token.exp * 1000).toISOString()
+                    if (typeof token.maxAge === "number") {
+                        session.expires = new Date(Date.now() + token.maxAge * 1000).toISOString()
                     }
                 }
             }
             return session
         },
-        async signIn({ user }) {
-            if (user.remember) {
-                if (authOptions.cookies?.sessionToken?.options) authOptions.cookies.sessionToken.options.maxAge = 30 * 24 * 60 * 60 // 30 days
-            } else {
-                if (authOptions.cookies?.sessionToken?.options) authOptions.cookies.sessionToken.options.maxAge = 24 * 60 * 60 // 1 day
-            }
+        async signIn() {
             return true
         },
     },
