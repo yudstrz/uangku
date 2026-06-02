@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { TransactionType } from "@/types";
 import { NextResponse } from "next/server";
 
@@ -11,10 +11,11 @@ export async function POST(request: Request) {
     }
 
     try {
-        const category = await prisma.category.update({
-            where: { id },
-            data: { name, type, color }
-        });
+        await execute(
+            "UPDATE Category SET name = ?, type = ?, color = ? WHERE id = ?",
+            [name, type, color, id]
+        );
+        const category = { id, name, type, color, userId };
         return NextResponse.json(category, { status: 200 });
     } catch (error: any) {
         console.error("Error updating category:", error);

@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(request: NextRequest) {
@@ -16,9 +16,11 @@ export async function DELETE(request: NextRequest) {
 
     try {
         // Check if account has any transactions
-        const transactionCount = await prisma.transactions.count({
-            where: { accountId: id }
-        });
+        const countResult = await execute(
+            "SELECT COUNT(*) as count FROM Transactions WHERE accountId = ?",
+            [id]
+        );
+        const transactionCount = Number(countResult.rows[0].count);
 
         if (transactionCount > 0) {
             return NextResponse.json({ 
@@ -27,13 +29,22 @@ export async function DELETE(request: NextRequest) {
             }, { status: 400 });
         }
 
-        const account = await prisma.account.delete({
-            where: { id }
-        });
-        return NextResponse.json(account, { status: 200 });
+        const accResult = await execute(
+            "SELECT * FROM Account WHERE id = ?",
+            [id]
+        );
+        if (accResult.rows.length === 0) {
+            return NextResponse.json({ error: "Account not found" }, { status: 404 });
+        }
+
+        await execute(
+            "DELETE FROM Account WHERE id = ?",
+            [id]
+        );
+        return NextResponse.json(accResult.rows[0], { status: 200 });
     } catch (error: any) {
         // Check if it's a foreign key constraint error
-        if (error.code === 'P2003') {
+        if (error.message?.includes('FOREIGN KEY constraint failed')) {
             return NextResponse.json({ 
                 error: "This account has transactions associated with it. Please delete them first or transfer them to another account.",
                 type: "FOREIGN_KEY_CONSTRAINT"

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(req:NextRequest) {
@@ -10,12 +10,11 @@ export async function GET(req:NextRequest) {
 
     const { id: userId } = token as { id: string };
     try {
-        const categories = await prisma.category.findMany({
-            where: {
-                userId: userId
-            }
-        });
-        return NextResponse.json(categories, { status: 200 });
+        const result = await execute(
+            "SELECT * FROM Category WHERE userId = ?",
+            [userId]
+        );
+        return NextResponse.json(result.rows, { status: 200 });
     } catch (error: any) {
         console.error("Error fetching categories:", error);
         return NextResponse.json(

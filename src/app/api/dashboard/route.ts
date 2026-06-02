@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -10,37 +10,71 @@ export async function GET(request: NextRequest) {
 
     try {
         // Fetch all data in parallel for better performance
-        const [categories, accounts, allTransactions, recentTransactions] = await Promise.all([
-            prisma.category.findMany({
-                where: { userId }
-            }),
-            prisma.account.findMany({
-                where: { userId }
-            }),
-            prisma.transactions.findMany({
-                where: { userId },
-                include: {
-                    category: true,
-                    account: true
-                },
-                orderBy: { date: 'desc' } // Optional: sort all transactions by date
-            }),
-            prisma.transactions.findMany({
-                where: { userId },
-                orderBy: { date: 'desc' },
-                take: 6,
-                include: {
-                    category: true,
-                    account: true
-                }
-            })
+        const [categoriesResult, accountsResult, allTransactionsResult, recentTransactionsResult] = await Promise.all([
+            execute(
+                "SELECT * FROM Category WHERE userId = ?",
+                [userId]
+            ),
+            execute(
+                "SELECT * FROM Account WHERE userId = ?",
+                [userId]
+            ),
+            execute(
+                `SELECT t.*, 
+                    c.id as cat_id, c.name as cat_name, c.color as cat_color, c.type as cat_type, c.userId as cat_userId,
+                    a.id as acc_id, a.name as acc_name, a.type as acc_type, a.balance as acc_balance, a.userId as acc_userId
+                 FROM Transactions t
+                 LEFT JOIN Category c ON t.categoryId = c.id
+                 LEFT JOIN Account a ON t.accountId = a.id
+                 WHERE t.userId = ?
+                 ORDER BY t.date DESC`,
+                [userId]
+            ),
+            execute(
+                `SELECT t.*, 
+                    c.id as cat_id, c.name as cat_name, c.color as cat_color, c.type as cat_type, c.userId as cat_userId,
+                    a.id as acc_id, a.name as acc_name, a.type as acc_type, a.balance as acc_balance, a.userId as acc_userId
+                 FROM Transactions t
+                 LEFT JOIN Category c ON t.categoryId = c.id
+                 LEFT JOIN Account a ON t.accountId = a.id
+                 WHERE t.userId = ?
+                 ORDER BY t.date DESC
+                 LIMIT 6`,
+                [userId]
+            ),
         ]);
 
+        // Transform rows to include nested category and account objects (matching Prisma include behavior)
+        const transformTransaction = (row: any) => ({
+            id: row.id,
+            type: row.type,
+            amount: row.amount,
+            date: row.date,
+            categoryId: row.categoryId,
+            accountId: row.accountId,
+            userId: row.userId,
+            notes: row.notes,
+            category: {
+                id: row.cat_id,
+                name: row.cat_name,
+                color: row.cat_color,
+                type: row.cat_type,
+                userId: row.cat_userId,
+            },
+            account: {
+                id: row.acc_id,
+                name: row.acc_name,
+                type: row.acc_type,
+                balance: row.acc_balance,
+                userId: row.acc_userId,
+            },
+        });
+
         return NextResponse.json({
-            categories,
-            accounts,
-            transactions: allTransactions, // All transactions
-            recentTransactions // Just the 6 most recent
+            categories: categoriesResult.rows,
+            accounts: accountsResult.rows,
+            transactions: allTransactionsResult.rows.map(transformTransaction),
+            recentTransactions: recentTransactionsResult.rows.map(transformTransaction),
         }, { status: 200 });
 
     } catch (error: any) {

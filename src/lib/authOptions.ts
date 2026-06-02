@@ -1,6 +1,5 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
+import { execute } from "@/lib/turso"
 import bcrypt from "bcrypt"
 import type { NextAuthOptions } from "next-auth"
 import type { DefaultSession, DefaultUser } from "next-auth"
@@ -22,7 +21,6 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -36,27 +34,30 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Email and password are required")
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
-                })
+                const result = await execute(
+                    "SELECT * FROM User WHERE email = ?",
+                    [credentials.email]
+                )
+
+                const user = result.rows[0]
 
                 if (!user) {
                     throw new Error("No user found with the given email")
                 }
 
-                const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+                const isValidPassword = await bcrypt.compare(credentials.password, user.password as string)
 
                 if (!isValidPassword) {
                     throw new Error("Invalid password")
                 }
 
                 return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    preferredCurrency: user.preferredCurrency,
-                    isDarkMode: user.isDarkMode,
-                    createdAt: user.createdAt,
+                    id: user.id as string,
+                    name: user.name as string,
+                    email: user.email as string,
+                    preferredCurrency: user.preferredCurrency as string,
+                    isDarkMode: Boolean(user.isDarkMode),
+                    createdAt: user.createdAt as string,
                     remember: (typeof credentials.remember === 'string' && credentials.remember === 'true') || (typeof credentials.remember === 'boolean' && credentials.remember === true),
                 }
             }

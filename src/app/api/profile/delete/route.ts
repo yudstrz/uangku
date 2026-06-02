@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute, batch } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(req: NextRequest) {
@@ -11,8 +11,11 @@ export async function DELETE(req: NextRequest) {
     const { id: userId } = token as { id: string }
 
     try {
-        const user = await prisma.user.findUnique({ where: { id: userId } })
-        if (!user) {
+        const userResult = await execute(
+            "SELECT id FROM User WHERE id = ?",
+            [userId]
+        );
+        if (userResult.rows.length === 0) {
             return NextResponse.json({ error: "User not found" }, { status: 404 })
         }
     } catch (error) {
@@ -25,17 +28,15 @@ export async function DELETE(req: NextRequest) {
 
 
     try {
-        await prisma.$transaction([
-            prisma.category.deleteMany({
-                where: { userId }
-            }),
-            prisma.passwordResetToken.deleteMany({
-                where: { userId }
-            }),
-            prisma.user.delete({
-                where: { id: userId }
-            })
-        ])
+        // Delete in proper order to respect foreign key constraints
+        await batch([
+            { sql: "DELETE FROM Budget WHERE userId = ?", args: [userId] },
+            { sql: "DELETE FROM Transactions WHERE userId = ?", args: [userId] },
+            { sql: "DELETE FROM Category WHERE userId = ?", args: [userId] },
+            { sql: "DELETE FROM Account WHERE userId = ?", args: [userId] },
+            { sql: "DELETE FROM PasswordResetToken WHERE userId = ?", args: [userId] },
+            { sql: "DELETE FROM User WHERE id = ?", args: [userId] },
+        ]);
         return NextResponse.json({ message: "User deleted successfully." })
     } catch (error) {
         console.error(error);

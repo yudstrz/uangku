@@ -1,31 +1,33 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     const token = await requireAuth(req);
-    // if (token instanceof NextResponse) {
-    //     return token;
-    // }
+    if (token instanceof NextResponse) {
+        return token;
+    }
 
     const { id: userId } = token as { id: string };
 
-    const result = await prisma.$queryRawUnsafe(`
-        SELECT 
-        TO_CHAR(t.date, 'FMMonth YYYY') AS month, 
-        c.id AS category_id,
-        c.name AS category_name,
-        c.type AS category_type,
-        SUM(t.amount) AS total
-        FROM "Transactions" t
-        INNER JOIN "Category" c ON t."categoryId" = c.id
-        WHERE t."userId"=$1 AND date >= CURRENT_DATE - INTERVAL '1 year'
-        GROUP BY month,c.id,c.name,c.type
-        ORDER BY month DESC;`, userId)
+    const result = await execute(
+        `SELECT 
+            strftime('%Y-%m', t.date) AS month,
+            c.id AS category_id,
+            c.name AS category_name,
+            c.type AS category_type,
+            SUM(t.amount) AS total
+        FROM Transactions t
+        INNER JOIN Category c ON t.categoryId = c.id
+        WHERE t.userId = ? AND t.date >= date('now', '-1 year')
+        GROUP BY month, c.id, c.name, c.type
+        ORDER BY month DESC`,
+        [userId]
+    );
 
     const monthlyMap = new Map();
 
-    for (const row of result as any[]) {
+    for (const row of result.rows as any[]) {
         const month = row.month;
 
         if (!monthlyMap.has(month)) {

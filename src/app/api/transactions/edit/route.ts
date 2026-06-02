@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute, transaction } from "@/lib/turso";
 import { TransactionType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,59 +17,72 @@ export async function PUT(request: NextRequest) {
 
     try {
         // Get existing transaction with the associated account
-        const existing = await prisma.transactions.findUnique({ 
-            where: { id },
-            include: { account: true }
-        });
-        if (!existing) {
+        const existingResult = await execute(
+            `SELECT t.*, a.id as acc_id, a.name as acc_name, a.type as acc_type, a.balance as acc_balance, a.userId as acc_userId
+             FROM Transactions t
+             JOIN Account a ON t.accountId = a.id
+             WHERE t.id = ?`,
+            [id]
+        );
+        if (existingResult.rows.length === 0) {
             return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
         }
+        const existing = existingResult.rows[0];
 
         // Verify new account exists
-        const newAccount = await prisma.account.findUnique({
-            where: { id: accountId }
-        });
-        if (!newAccount) {
+        const newAccResult = await execute(
+            "SELECT * FROM Account WHERE id = ?",
+            [accountId]
+        );
+        if (newAccResult.rows.length === 0) {
             return NextResponse.json({ error: "Account not found" }, { status: 404 });
         }
+        const newAccount = newAccResult.rows[0];
 
         // Calculate account balance changes
-        const oldAmount = existing.amount;
+        const oldAmount = Number(existing.amount);
         const newAmount = amount;
-        const oldType = existing.type;
+        const oldType = existing.type as string;
         const newType = type as TransactionType;
-        const oldAccountId = existing.accountId;
+        const oldAccountId = existing.accountId as string;
         const isSameAccount = oldAccountId === accountId;
 
         // Start a transaction for all database operations
-        const result = await prisma.$transaction(async (prisma) => {
+        const result = await transaction(async (tx) => {
             // Handle budget updates
-            const oldMonth = existing.date.toISOString().slice(0, 7);
+            const existingDate = new Date(existing.date as string);
+            const oldMonth = existingDate.toISOString().slice(0, 7);
             const newMonth = transactionDate.toISOString().slice(0, 7);
-            const oldBudget = await prisma.budget.findFirst({
-                where: { userId, categoryId: existing.categoryId, month: oldMonth }
+
+            const oldBudgetResult = await tx.execute({
+                sql: "SELECT * FROM Budget WHERE userId = ? AND categoryId = ? AND month = ? LIMIT 1",
+                args: [userId, existing.categoryId as string, oldMonth]
             });
-            const newBudget = await prisma.budget.findFirst({
-                where: { userId, categoryId, month: newMonth }
+            const oldBudget = oldBudgetResult.rows.length > 0 ? oldBudgetResult.rows[0] : null;
+
+            const newBudgetResult = await tx.execute({
+                sql: "SELECT * FROM Budget WHERE userId = ? AND categoryId = ? AND month = ? LIMIT 1",
+                args: [userId, categoryId, newMonth]
             });
+            const newBudget = newBudgetResult.rows.length > 0 ? newBudgetResult.rows[0] : null;
 
             if (existing.categoryId === categoryId && oldMonth === newMonth && oldBudget) {
                 const diff = (newType === 'expense' ? newAmount : 0) - (oldType === 'expense' ? oldAmount : 0);
-                await prisma.budget.update({
-                    where: { id: oldBudget.id },
-                    data: { spent: oldBudget.spent + diff }
+                await tx.execute({
+                    sql: "UPDATE Budget SET spent = ? WHERE id = ?",
+                    args: [Number(oldBudget.spent) + diff, oldBudget.id as string]
                 });
             } else {
                 if (oldBudget && oldType === 'expense') {
-                    await prisma.budget.update({
-                        where: { id: oldBudget.id },
-                        data: { spent: Math.max(0, oldBudget.spent - oldAmount) }
+                    await tx.execute({
+                        sql: "UPDATE Budget SET spent = ? WHERE id = ?",
+                        args: [Math.max(0, Number(oldBudget.spent) - oldAmount), oldBudget.id as string]
                     });
                 }
                 if (newBudget && newType === 'expense') {
-                    await prisma.budget.update({
-                        where: { id: newBudget.id },
-                        data: { spent: newBudget.spent + newAmount }
+                    await tx.execute({
+                        sql: "UPDATE Budget SET spent = ? WHERE id = ?",
+                        args: [Number(newBudget.spent) + newAmount, newBudget.id as string]
                     });
                 }
             }
@@ -89,32 +102,34 @@ export async function PUT(request: NextRequest) {
                     balanceChange = oldAmount - newAmount;
                 }
 
-                await prisma.account.update({
-                    where: { id: accountId },
-                    data: { balance: newAccount.balance + balanceChange }
+                await tx.execute({
+                    sql: "UPDATE Account SET balance = ? WHERE id = ?",
+                    args: [Number(newAccount.balance) + balanceChange, accountId]
                 });
             } else {
                 // Different accounts, revert old account and update new account
                 // Revert old account
                 const oldAccountChange = oldType === 'income' ? -oldAmount : oldAmount;
-                await prisma.account.update({
-                    where: { id: oldAccountId },
-                    data: { balance: { increment: oldAccountChange } }
+                await tx.execute({
+                    sql: "UPDATE Account SET balance = balance + ? WHERE id = ?",
+                    args: [oldAccountChange, oldAccountId]
                 });
 
                 // Update new account
                 const newAccountChange = newType === 'income' ? newAmount : -newAmount;
-                await prisma.account.update({
-                    where: { id: accountId },
-                    data: { balance: { increment: newAccountChange } }
+                await tx.execute({
+                    sql: "UPDATE Account SET balance = balance + ? WHERE id = ?",
+                    args: [newAccountChange, accountId]
                 });
             }
 
             // Update the transaction
-            return await prisma.transactions.update({
-                where: { id },
-                data: { type, amount, date: transactionDate, categoryId, accountId, notes }
+            await tx.execute({
+                sql: "UPDATE Transactions SET type = ?, amount = ?, date = ?, categoryId = ?, accountId = ?, notes = ? WHERE id = ?",
+                args: [type, amount, transactionDate.toISOString(), categoryId, accountId, notes, id]
             });
+
+            return { id, type, amount, date: transactionDate.toISOString(), categoryId, accountId, notes, userId };
         });
 
         return NextResponse.json({ 

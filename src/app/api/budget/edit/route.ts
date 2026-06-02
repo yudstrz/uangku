@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 
 
 export async function PUT(req: NextRequest) {
@@ -16,11 +16,16 @@ export async function PUT(req: NextRequest) {
     }
     try {
         // 1️⃣ Find existing first
-        const existing = await prisma.budget.findUnique({ where: { id } });
+        const existingResult = await execute(
+            "SELECT * FROM Budget WHERE id = ?",
+            [id]
+        );
 
-        if (!existing) {
+        if (existingResult.rows.length === 0) {
             return NextResponse.json({ error: "Budget not found" }, { status: 404 });
         }
+        const existing = existingResult.rows[0];
+
         if (existing.userId !== userId) {
             return NextResponse.json({ error: "Not authorized" }, { status: 403 });
         }
@@ -32,11 +37,12 @@ export async function PUT(req: NextRequest) {
             }, { status: 400 });
         }
         
-        const updated = await prisma.budget.update({ 
-            where: { id },
-            data: { amount, spent }
-        });
+        await execute(
+            "UPDATE Budget SET amount = ?, spent = ? WHERE id = ?",
+            [amount, spent, id]
+        );
 
+        const updated = { ...existing, amount, spent };
         return NextResponse.json({ message: "Budget updated successfully", budget: updated }, { status: 200 });
 
     } catch (error) {

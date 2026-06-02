@@ -1,7 +1,8 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { AccountType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
     const token = await requireAuth(request);
@@ -17,9 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const account = await prisma.account.create({
-            data: { name, balance, type, userId }
-        })
+        const id = crypto.randomUUID();
+        await execute(
+            "INSERT INTO Account (id, name, balance, type, userId) VALUES (?, ?, ?, ?, ?)",
+            [id, name, balance, type, userId]
+        );
+        const account = { id, name, balance, type, userId };
         return NextResponse.json(account, { status: 201 });
     } catch (error: any) {
         console.error("Error creating account:", error);

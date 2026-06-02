@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -11,18 +11,24 @@ export async function GET(req: NextRequest) {
     const { id: userId } = token as { id: string }
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        })
+        const result = await execute(
+            "SELECT * FROM User WHERE id = ?",
+            [userId]
+        );
 
-        if (!user) {
+        if (result.rows.length === 0) {
             return NextResponse.json(
                 { error: "User not found" },
                 { status: 404 }
             );
         }
 
-        return NextResponse.json(user, { status: 200 });
+        const user = result.rows[0];
+        // Convert isDarkMode from integer to boolean for consistency
+        return NextResponse.json({
+            ...user,
+            isDarkMode: Boolean(user.isDarkMode)
+        }, { status: 200 });
     } catch (error: any) {
         console.error(error)
         return NextResponse.json(

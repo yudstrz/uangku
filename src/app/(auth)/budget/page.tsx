@@ -396,11 +396,11 @@ export default function BudgetPage() {
                   {isOverBudget(totalBudget, totalSpent) ? (
                     <div className="bg-red-100 dark:bg-red-900 p-3 rounded-md flex items-center text-red-800 dark:text-red-300 w-full">
                       <ExclamationCircleIcon className="h-5 w-5 mr-2" />
-                      <span>You've exceeded your total budget for {formatMonth(activeMonth, "activeMonth")}</span>
+                      <span>You have exceeded your total budget for {formatMonth(activeMonth, "activeMonth")}</span>
                     </div>
                   ) : (
                     <div className="bg-green-100 dark:bg-green-900 p-3 rounded-md flex items-center text-green-800 dark:text-green-300 w-full">
-                      <span>You're on track with your budget for {formatMonth(activeMonth, "activeMonthh")}</span>
+                      <span>You are on track with your budget for {formatMonth(activeMonth, "activeMonthh")}</span>
                     </div>
                   )}
                 </div>
@@ -500,7 +500,7 @@ export default function BudgetPage() {
                 {isOverBudget(budget.amount, budget.spent) && (
                   <div className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center">
                     <ExclamationCircleIcon className="h-4 w-4 mr-1" />
-                    You've exceeded this budget
+                    You have exceeded this budget
                   </div>
                 )}
               </div>

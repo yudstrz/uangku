@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
     if (req.method !== 'POST') {
@@ -13,12 +14,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const existingUser = await prisma.user?.findUnique({
-        where: {
-            email,
-        },
-    });
-    if (existingUser) {
+    const existingResult = await execute(
+        "SELECT id FROM User WHERE email = ?",
+        [email]
+    );
+    if (existingResult.rows.length > 0) {
         return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
     if (password.length < 6) {
@@ -30,16 +30,15 @@ export async function POST(req: NextRequest) {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+        const id = crypto.randomUUID();
+        const now = new Date().toISOString();
 
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword
-            },
-        });
+        await execute(
+            "INSERT INTO User (id, name, email, password, preferredCurrency, isDarkMode, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'LKR', 0, ?, ?)",
+            [id, name, email, hashedPassword, now, now]
+        );
 
-        return NextResponse.json({ message: 'User created successfully', email: user.email }, { status: 201 });
+        return NextResponse.json({ message: 'User created successfully', email }, { status: 201 });
     } catch (error: any) {
         console.error("Error creating user:", error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

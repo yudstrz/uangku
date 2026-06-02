@@ -1,6 +1,6 @@
 import { sendPasswordResetEmail } from "@/lib/email";
-import { prisma } from "@/lib/prisma";
-import { randomBytes } from "crypto";
+import { execute } from "@/lib/turso";
+import { randomBytes, randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -10,33 +10,37 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-        where: {
-            email,
-        },
-    });
+    const userResult = await execute(
+        "SELECT * FROM User WHERE email = ?",
+        [email]
+    );
+    const user = userResult.rows[0];
 
     if (!user) {
         return NextResponse.json({ error: "If an account exists with this email, a reset link has been sent" }, { status: 404 });
     }
 
     const token = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
+    const expiresAt = new Date(Date.now() + 3600000).toISOString(); // Token expires in 1 hour
 
-    await prisma.passwordResetToken.upsert({
-        where: {
-            userId: user.id,
-        },
-        create: {
-            token,
-            userId: user.id,
-            expiresAt,
-        },
-        update: {
-            token,
-            expiresAt,
-        },
-    });
+    // Upsert: delete existing token for this user, then insert new one
+    const existingToken = await execute(
+        "SELECT id FROM PasswordResetToken WHERE userId = ?",
+        [user.id as string]
+    );
+
+    if (existingToken.rows.length > 0) {
+        await execute(
+            "UPDATE PasswordResetToken SET token = ?, expiresAt = ?, createdAt = ? WHERE userId = ?",
+            [token, expiresAt, new Date().toISOString(), user.id as string]
+        );
+    } else {
+        const id = randomUUID();
+        await execute(
+            "INSERT INTO PasswordResetToken (id, token, userId, expiresAt, createdAt) VALUES (?, ?, ?, ?, ?)",
+            [id, token, user.id as string, expiresAt, new Date().toISOString()]
+        );
+    }
 
     const resetLink = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
     //send mail

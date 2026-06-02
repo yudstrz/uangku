@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(req: NextRequest) {
@@ -13,32 +13,21 @@ export async function PUT(req: NextRequest) {
     const { currency }: { currency: string } = body;
 
     try {
-        const user = prisma.user.findUnique({
-            where: {
-                id: userId
-            }
-        })
-        if (!user) {
+        const userResult = await execute(
+            "SELECT id FROM User WHERE id = ?",
+            [userId]
+        );
+        if (userResult.rows.length === 0) {
             return NextResponse.json(
                 { error: "User not found" },
                 { status: 404 }
             );
         }
 
-        const updatedUser = await prisma.user.update({
-            where: {
-                id: userId
-            },
-            data: {
-                preferredCurrency: currency
-            }
-        })
-        if (!updatedUser) {
-            return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
-            );
-        }
+        await execute(
+            "UPDATE User SET preferredCurrency = ?, updatedAt = ? WHERE id = ?",
+            [currency, new Date().toISOString(), userId]
+        );
 
         return NextResponse.json({ message: "Currency updated successfully" }, { status: 200 })
     } catch (error: any) {

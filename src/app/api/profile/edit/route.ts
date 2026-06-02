@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -13,17 +13,21 @@ export async function POST(req: NextRequest) {
     const { name }: { name: string } = body;
 
     try {
-
-        const user = await prisma.user.update({
-            where: { id: userId },
-            data: { name }
-        })
-        if (!user) {
+        const userResult = await execute(
+            "SELECT id FROM User WHERE id = ?",
+            [userId]
+        );
+        if (userResult.rows.length === 0) {
             return NextResponse.json(
                 { error: "User not found" },
-                { status: 40 }
+                { status: 404 }
             )
         }
+
+        await execute(
+            "UPDATE User SET name = ?, updatedAt = ? WHERE id = ?",
+            [name, new Date().toISOString(), userId]
+        );
         return NextResponse.json({ message: "User Name updated successfully" }, { status: 200 })
     } catch (error: any) {
         console.error(error)

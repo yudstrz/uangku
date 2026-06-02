@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { AccountType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,21 +16,20 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-        const acc = await prisma.account.findUnique({
-            where: { id },
-        })
+        const accResult = await execute(
+            "SELECT * FROM Account WHERE id = ?",
+            [id]
+        );
 
-        if (!acc) {
+        if (accResult.rows.length === 0) {
             return NextResponse.json({ error: "Account not found" }, { status: 404 });
         }
-        const account = await prisma.account.update({
-            where: { id },
-            data: {
-                name,
-                balance,
-                type,
-            },
-        });
+
+        await execute(
+            "UPDATE Account SET name = ?, balance = ?, type = ? WHERE id = ?",
+            [name, balance, type, id]
+        );
+        const account = { id, name, balance, type, userId: accResult.rows[0].userId };
         return NextResponse.json(account, { status: 200 });
     } catch (error: any) {
         console.error("Error updating account:", error);

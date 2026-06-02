@@ -45,7 +45,7 @@ export default function Navigation() {
         </Link>
         <nav className="flex-1 space-y-1">
           {navigation.map((item) => {
-            const isActive = item.href === pathname;
+            const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}

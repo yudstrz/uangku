@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
     const token = await requireAuth(req);
@@ -11,41 +12,41 @@ export async function POST(req: NextRequest) {
     const { categoryId, amount, month } = await req.json();
 
     try {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) {
+        const userResult = await execute(
+            "SELECT id FROM User WHERE id = ?",
+            [userId]
+        );
+        if (userResult.rows.length === 0) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
         const { start, end } = getStartAndEndOfMonth(month);
         console.log(start, end);
 
-        const transactions = await prisma.transactions.findMany({
-            where: {
-                userId,
-                categoryId,
-                date: { gte: start, lte: end }
-            }
-        });
+        const txResult = await execute(
+            "SELECT * FROM Transactions WHERE userId = ? AND categoryId = ? AND date >= ? AND date <= ?",
+            [userId, categoryId, start.toISOString(), end.toISOString()]
+        );
 
-        const totalSpent = transactions.reduce((acc, t) => acc + t.amount, 0);
+        const totalSpent = txResult.rows.reduce((acc, t) => acc + Number(t.amount), 0);
         console.log(totalSpent);
 
-        const alreadyAvailable = await prisma.budget.findFirst({
-            where: { userId, categoryId, month }
-        });
-        if (alreadyAvailable) {
+        const existingResult = await execute(
+            "SELECT id FROM Budget WHERE userId = ? AND categoryId = ? AND month = ? LIMIT 1",
+            [userId, categoryId, month]
+        );
+        if (existingResult.rows.length > 0) {
             return NextResponse.json({ error: "Budget already available for this month" }, { status: 400 });
         }
 
-        const budget = await prisma.budget.create({
-            data: {
-                categoryId,
-                amount,
-                month,
-                userId,
-                spent: transactions.length > 0 ? totalSpent : 0
-            }
-        });
+        const id = crypto.randomUUID();
+        const spent = txResult.rows.length > 0 ? totalSpent : 0;
+        await execute(
+            "INSERT INTO Budget (id, categoryId, amount, month, userId, spent) VALUES (?, ?, ?, ?, ?, ?)",
+            [id, categoryId, amount, month, userId, spent]
+        );
+
+        const budget = { id, categoryId, amount, month, userId, spent };
 
         if (!budget) {
             return NextResponse.json({ error: "Error creating budget" }, { status: 500 });

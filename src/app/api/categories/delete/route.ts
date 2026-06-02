@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextResponse } from "next/server";
 
 export async function DELETE(request: Request) {
@@ -11,14 +11,18 @@ export async function DELETE(request: Request) {
 
     try {
         // Check if category has any transactions
-        const transactionCount = await prisma.transactions.count({
-            where: { categoryId: id }
-        });
+        const txCountResult = await execute(
+            "SELECT COUNT(*) as count FROM Transactions WHERE categoryId = ?",
+            [id]
+        );
+        const transactionCount = Number(txCountResult.rows[0].count);
 
         // Check if category has any budgets
-        const budgetCount = await prisma.budget.count({
-            where: { categoryId: id }
-        });
+        const budgetCountResult = await execute(
+            "SELECT COUNT(*) as count FROM Budget WHERE categoryId = ?",
+            [id]
+        );
+        const budgetCount = Number(budgetCountResult.rows[0].count);
 
         if (transactionCount > 0 || budgetCount > 0) {
             let errorMessage = "Cannot delete this category because it has ";
@@ -39,13 +43,22 @@ export async function DELETE(request: Request) {
             }, { status: 400 });
         }
 
-        const category = await prisma.category.delete({
-            where: { id }
-        });
-        return NextResponse.json(category, { status: 200 });
+        const catResult = await execute(
+            "SELECT * FROM Category WHERE id = ?",
+            [id]
+        );
+        if (catResult.rows.length === 0) {
+            return NextResponse.json({ error: "Category not found" }, { status: 404 });
+        }
+
+        await execute(
+            "DELETE FROM Category WHERE id = ?",
+            [id]
+        );
+        return NextResponse.json(catResult.rows[0], { status: 200 });
     } catch (error: any) {
         // Check if it's a foreign key constraint error
-        if (error.code === 'P2003') {
+        if (error.message?.includes('FOREIGN KEY constraint failed')) {
             return NextResponse.json({ 
                 error: "This category has related transactions or budgets. Please delete those first.",
                 type: "FOREIGN_KEY_CONSTRAINT"

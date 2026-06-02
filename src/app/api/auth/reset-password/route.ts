@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { execute } from "@/lib/turso";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
@@ -9,43 +9,39 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const resetToken = await prisma.passwordResetToken.findUnique({
-        where: {
-            token: token,
-        },
-        include: {
-            user: true,
-        },
-    });
+    const tokenResult = await execute(
+        `SELECT prt.id as tokenId, prt.token, prt.userId, prt.expiresAt, prt.createdAt,
+                u.id as uid, u.name, u.email, u.password as userPassword
+         FROM PasswordResetToken prt
+         JOIN User u ON prt.userId = u.id
+         WHERE prt.token = ?`,
+        [token]
+    );
+
+    const resetToken = tokenResult.rows[0];
 
     if (!resetToken) {
         return NextResponse.json({ error: "Invalid token" }, { status: 400 });
     }
-    if (resetToken.expiresAt < new Date()) {
-        await prisma.passwordResetToken.delete({
-            where: {
-                id: resetToken.id,
-            },
-        });
+    if (new Date(resetToken.expiresAt as string) < new Date()) {
+        await execute(
+            "DELETE FROM PasswordResetToken WHERE id = ?",
+            [resetToken.tokenId as string]
+        );
         return NextResponse.json({ error: "Token expired" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.update({
-        where: {
-            id: resetToken.userId,
-        },
-        data: {
-            password: hashedPassword,
-        },
-    })
+    await execute(
+        "UPDATE User SET password = ?, updatedAt = ? WHERE id = ?",
+        [hashedPassword, new Date().toISOString(), resetToken.userId as string]
+    );
 
-    await prisma.passwordResetToken.delete({
-        where: {
-            id: resetToken.id,
-        },
-    });
+    await execute(
+        "DELETE FROM PasswordResetToken WHERE id = ?",
+        [resetToken.tokenId as string]
+    );
 
     return NextResponse.json({ message: "Password reset successfully" }, { status: 200 });
 }
