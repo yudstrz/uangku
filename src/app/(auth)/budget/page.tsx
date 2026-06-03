@@ -303,12 +303,12 @@ export default function BudgetPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Budget Planning</h1>
 
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {/* Month selector */}
-          <div className="flex items-center h-10">
+          <div className="flex items-center h-10 w-full sm:w-auto">
             {isLoading ? (
               <Skeleton height={40} width={208} />
             ) : (
@@ -533,8 +533,8 @@ export default function BudgetPage() {
 
       {/* Budget Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                 {editingBudget ? 'Edit Budget' : 'Add New Budget'}

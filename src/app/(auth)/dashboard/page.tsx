@@ -200,12 +200,12 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header and Date Range Selector */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         {isLoading ? (
           <Skeleton width={150} height={36} />
         ) : (
-          <div className="flex items-center space-x-2 relative">
+          <div className="flex items-center space-x-2 relative w-full sm:w-auto justify-end">
             <button
               className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}

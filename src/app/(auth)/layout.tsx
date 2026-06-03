@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import Header from "@/components/Header";
@@ -12,6 +12,11 @@ export default function AuthLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  
+  // Close mobile sidebar on route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
   
   // Don't show sidebar for auth pages
   const isAuthPage = pathname.includes('/auth/');
@@ -29,7 +34,10 @@ export default function AuthLayout({
           onClick={() => setSidebarOpen(false)}
         >
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
-          <div className="fixed inset-y-0 left-0 flex flex-col z-40 w-full sm:w-64 bg-white dark:bg-gray-800 h-full">
+          <div 
+            className="fixed inset-y-0 left-0 flex flex-col z-40 w-full sm:w-64 bg-white dark:bg-gray-800 h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Navigation />
           </div>
         </div>

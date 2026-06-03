@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/Button';
 import { Input, Select, FormGroup } from '@/components/form';
 import { Account } from '@/types';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 interface AccountFormProps {
   onSubmit: (data: Partial<Account>) => void;
@@ -16,11 +17,11 @@ export default function AccountForm({
   onCancel,
   initialData
 }: AccountFormProps) {
-  const [formData, setFormData] = useState<Partial<Account>>({
+  const [formData, setFormData] = useState<any>({
     name: '',
-    balance: 0,
     type: 'bank',
-    ...initialData
+    ...initialData,
+    balance: initialData?.balance !== undefined ? String(initialData.balance) : '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,13 +36,17 @@ export default function AccountForm({
 
   const handleChange = (name: string, value: any) => {
     if (name === 'balance') {
-      const numValue = parseFloat(value);
-      setFormData(prev => ({
+      let cleanValue = value;
+      if (cleanValue.startsWith('0') && cleanValue.length > 1 && cleanValue[1] !== '.') {
+        cleanValue = cleanValue.replace(/^0+/, '');
+        if (cleanValue === '') cleanValue = '0';
+      }
+      setFormData((prev: any) => ({
         ...prev,
-        [name]: isNaN(numValue) ? 0 : numValue
+        balance: cleanValue
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev: any) => ({
         ...prev,
         [name]: value
       }));
@@ -55,8 +60,13 @@ export default function AccountForm({
       newErrors.name = 'Account name is required';
     }
 
-    if (formData.balance === undefined) {
+    if (formData.balance === undefined || formData.balance === '') {
       newErrors.balance = 'Balance is required';
+    } else {
+      const balanceNum = parseFloat(formData.balance as unknown as string);
+      if (isNaN(balanceNum)) {
+        newErrors.balance = 'Balance must be a valid number';
+      }
     }
 
     if (!formData.type) {
@@ -71,7 +81,10 @@ export default function AccountForm({
     e.preventDefault();
     
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit({
+        ...formData,
+        balance: parseFloat(formData.balance as unknown as string) || 0
+      });
     }
   };
 
@@ -111,7 +124,7 @@ export default function AccountForm({
           value={formData.balance === undefined ? '' : formData.balance}
           onChange={(e) => handleChange('balance', e.target.value)}
           error={errors.balance}
-          icon={<span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>}
+          icon={<BanknotesIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
           placeholder="0.00"
         />
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">

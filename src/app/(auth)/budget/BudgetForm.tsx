@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/Button';
 import { Input, Select, FormGroup } from '@/components/form';
 import { Budget, Category } from '@/types';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 interface BudgetFormProps {
   onSubmit: (data: Partial<Budget>) => void;
@@ -21,12 +22,12 @@ export default function BudgetForm({
   categories,
   defaultMonth = new Date().toISOString().slice(0, 7) // Current month in YYYY-MM format
 }: BudgetFormProps) {
-  const [formData, setFormData] = useState<Partial<Budget>>({
+  const [formData, setFormData] = useState<any>({
     categoryId: '',
-    amount: 0,
     month: defaultMonth,
-    spent: initialData?.spent || 0,
-    ...initialData
+    ...initialData,
+    amount: initialData?.amount !== undefined ? String(initialData.amount) : '',
+    spent: initialData?.spent !== undefined ? String(initialData.spent) : '0',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,15 +36,18 @@ export default function BudgetForm({
   const expenseCategories = categories?.filter(c => c.type === 'expense');
 
   const handleChange = (name: string, value: any) => {
-    // Handle numeric fields
     if (name === 'amount' || name === 'spent') {
-      const numValue = parseFloat(value);
-      setFormData(prev => ({
+      let cleanValue = value;
+      if (cleanValue.startsWith('0') && cleanValue.length > 1 && cleanValue[1] !== '.') {
+        cleanValue = cleanValue.replace(/^0+/, '');
+        if (cleanValue === '') cleanValue = '0';
+      }
+      setFormData((prev: any) => ({
         ...prev,
-        [name]: isNaN(numValue) ? 0 : numValue
+        [name]: cleanValue
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev: any) => ({
         ...prev,
         [name]: value
       }));
@@ -77,7 +81,8 @@ export default function BudgetForm({
       newErrors.categoryId = 'Category is required';
     }
 
-    if (!formData.amount || formData.amount <= 0) {
+    const amountNum = parseFloat(formData.amount as unknown as string);
+    if (isNaN(amountNum) || amountNum <= 0) {
       newErrors.amount = 'Budget amount must be greater than 0';
     }
 
@@ -93,7 +98,11 @@ export default function BudgetForm({
     e.preventDefault();
 
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit({
+        ...formData,
+        amount: parseFloat(formData.amount as unknown as string) || 0,
+        spent: formData.spent !== undefined ? (parseFloat(formData.spent as unknown as string) || 0) : undefined
+      });
     }
   };
 
@@ -145,7 +154,7 @@ export default function BudgetForm({
           value={formData.amount}
           onChange={(e) => handleChange('amount', e.target.value)}
           error={errors.amount}
-          icon={<span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>}
+          icon={<BanknotesIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
           placeholder="0.00"
         />
 
@@ -160,7 +169,7 @@ export default function BudgetForm({
             label="Amount Spent"
             value={formData.spent}
             onChange={(e) => handleChange('spent', e.target.value)}
-            icon={<span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>}
+            icon={<BanknotesIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
             placeholder="0.00"
             className="mb-0"
           />

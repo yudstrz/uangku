@@ -5,6 +5,7 @@ import Button from '@/components/Button';
 import { Input, Select, TextArea, FormGroup } from '@/components/form';
 import { Account, Category, Transaction } from '@/types';
 import { showToast } from 'nextjs-toast-notify';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 interface TransactionFormProps {
   onSubmit: (data: Partial<Transaction>) => void;
@@ -17,14 +18,14 @@ export default function TransactionForm({
   onCancel,
   initialData
 }: TransactionFormProps) {
-  const [formData, setFormData] = useState<Partial<Transaction>>({
+  const [formData, setFormData] = useState<any>({
     type: 'expense',
-    amount: 0,
     date: new Date().toISOString().split('T')[0],
     categoryId: '',
     accountId: '',
     notes: '',
-    ...initialData
+    ...initialData,
+    amount: initialData?.amount !== undefined ? String(initialData.amount) : '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,7 +57,7 @@ export default function TransactionForm({
         if (formData.categoryId) {
             const category: Category | undefined = data.find((c: Category) => c.id === formData.categoryId);
           if (category && category.type !== formData.type) {
-            setFormData(prev => ({ ...prev, categoryId: '' }));
+            setFormData((prev: any) => ({ ...prev, categoryId: '' }));
           }
         }
       })
@@ -98,16 +99,29 @@ export default function TransactionForm({
   }, []);
 
   const handleChange = (name: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'amount' ? parseFloat(value) || 0 : value
-    }));
+    if (name === 'amount') {
+      let cleanValue = value;
+      if (cleanValue.startsWith('0') && cleanValue.length > 1 && cleanValue[1] !== '.') {
+        cleanValue = cleanValue.replace(/^0+/, '');
+        if (cleanValue === '') cleanValue = '0';
+      }
+      setFormData((prev: any) => ({
+        ...prev,
+        amount: cleanValue
+      }));
+    } else {
+      setFormData((prev: any) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.amount || formData.amount <= 0) {
+    const amountNum = parseFloat(formData.amount as unknown as string);
+    if (isNaN(amountNum) || amountNum <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
     }
 
@@ -135,9 +149,11 @@ export default function TransactionForm({
     e.preventDefault();
 
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit({
+        ...formData,
+        amount: parseFloat(formData.amount as unknown as string) || 0
+      });
     }
-
   };
 
   // Prepare options for select components
@@ -185,7 +201,7 @@ export default function TransactionForm({
           value={formData.amount}
           onChange={(e) => handleChange('amount', e.target.value)}
           error={errors.amount}
-          icon={<span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>}
+          icon={<BanknotesIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
           placeholder="0.00"
         />
 
