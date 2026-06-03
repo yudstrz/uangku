@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const { id: userId } = token as { id: string }
     const body = await req.json()
-    const { name }: { name: string } = body;
+    const { name, image }: { name: string; image?: string | null } = body;
 
     try {
         const userResult = await execute(
@@ -24,11 +24,18 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        await execute(
-            "UPDATE User SET name = ?, updatedAt = ? WHERE id = ?",
-            [name, new Date().toISOString(), userId]
-        );
-        return NextResponse.json({ message: "User Name updated successfully" }, { status: 200 })
+        if (image !== undefined) {
+            await execute(
+                "UPDATE User SET name = ?, image = ?, updatedAt = ? WHERE id = ?",
+                [name, image, new Date().toISOString(), userId]
+            );
+        } else {
+            await execute(
+                "UPDATE User SET name = ?, updatedAt = ? WHERE id = ?",
+                [name, new Date().toISOString(), userId]
+            );
+        }
+        return NextResponse.json({ message: "Profile updated successfully" }, { status: 200 })
     } catch (error: any) {
         console.error(error)
         return NextResponse.json(

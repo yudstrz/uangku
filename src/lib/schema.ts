@@ -12,6 +12,7 @@ const SCHEMA_STATEMENTS = [
         password TEXT NOT NULL,
         preferredCurrency TEXT NOT NULL DEFAULT 'IDR',
         isDarkMode INTEGER NOT NULL DEFAULT 0,
+        image TEXT,
         createdAt TEXT NOT NULL DEFAULT (datetime('now')),
         updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
@@ -72,5 +73,18 @@ export async function initializeSchema() {
     for (const stmt of SCHEMA_STATEMENTS) {
         await db.execute(stmt);
     }
+    
+    // Migration: Add image column to User table if it doesn't exist
+    try {
+        await db.execute("ALTER TABLE User ADD COLUMN image TEXT");
+        console.log("Migration: Added 'image' column to 'User' table.");
+    } catch (error: any) {
+        // SQLite will throw error if column already exists
+        const errMsg = error?.message || "";
+        if (!errMsg.includes("duplicate column") && !errMsg.includes("already exists")) {
+            console.warn("Migration notice: failed to add 'image' column:", errMsg);
+        }
+    }
+    
     console.log('Database schema initialized successfully.');
 }

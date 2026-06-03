@@ -13,6 +13,7 @@ type HeaderProps = {
 type User = {
   name?: string;
   isDarkMode?: boolean;
+  image?: string | null;
 };
 
 export default function Header({ toggleSidebar }: HeaderProps) {
@@ -111,14 +112,22 @@ export default function Header({ toggleSidebar }: HeaderProps) {
             <div className="ml-3 relative">
               <Link href="/profile">
                 <div className="flex items-center space-x-2 cursor-pointer">
-                  <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300">
-                    <span>{user?.name
-                      ? user.name
-                        .split(' ')
-                        .map(word => word.charAt(0).toUpperCase())
-                        .join('')
-                      : ''}</span>
-                  </div>
+                  {user?.image ? (
+                    <img 
+                      src={user.image} 
+                      alt={user?.name || "User Avatar"} 
+                      className="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700" 
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300">
+                      <span>{user?.name
+                        ? user.name
+                          .split(' ')
+                          .map(word => word.charAt(0).toUpperCase())
+                          .join('')
+                        : ''}</span>
+                    </div>
+                  )}
                 </div>
               </Link>
             </div>

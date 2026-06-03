@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    image: user?.image || null as string | null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +51,7 @@ export default function ProfilePage() {
         setProfileForm({
           name: data.name,
           email: data.email,
+          image: data.image || null,
         });
         setIsDarkMode(data.isDarkMode);
       })
@@ -66,6 +68,75 @@ export default function ProfilePage() {
         });
       });
   }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast.error("Only image files are allowed", {
+        duration: 3000,
+        progress: true,
+        position: "top-right",
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast.error("File size exceeds 2MB", {
+        duration: 3000,
+        progress: true,
+        position: "top-right",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        const maxDim = 200;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const base64Resized = canvas.toDataURL("image/jpeg", 0.8);
+          setProfileForm(prev => ({
+            ...prev,
+            image: base64Resized
+          }));
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setProfileForm(prev => ({
+      ...prev,
+      image: null
+    }));
+  };
 
   // Available currencies
   const currencies = [
@@ -232,7 +303,8 @@ export default function ProfilePage() {
           setUser(prev => prev ? {
             ...prev,
             name: profileForm.name ?? "",
-            email: profileForm.email ?? ""
+            email: profileForm.email ?? "",
+            image: profileForm.image
           } : prev);
           setIsEditingProfile(false);
           showToast.success(data.message, {
@@ -423,7 +495,54 @@ export default function ProfilePage() {
         {loading ? (
           <ProfileSkeleton />
         ) : isEditingProfile ? (
-          <form onSubmit={handleProfileFormSubmit} className="space-y-4">
+          <form onSubmit={handleProfileFormSubmit} className="space-y-6">
+            {/* Image Upload / Remove Section */}
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+              <div className="relative">
+                {profileForm.image ? (
+                  <img
+                    src={profileForm.image}
+                    alt="Preview"
+                    className="h-20 w-20 rounded-full object-cover border-2 border-green-500 shadow-md"
+                  />
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-semibold border-2 border-green-500 shadow-md">
+                    <span>
+                      {profileForm.name
+                        ? profileForm.name
+                            .split(" ")
+                            .map((word) => word.charAt(0).toUpperCase())
+                            .join("")
+                        : "U"}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col items-center sm:items-start space-y-2">
+                <label className="cursor-pointer bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 text-center shadow-sm">
+                  Upload Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                </label>
+                {profileForm.image && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition duration-200"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  JPG, PNG, or GIF. Max 2MB. Resized automatically.
+                </p>
+              </div>
+            </div>
+
             <FormGroup>
               <Input
                 type="text"
@@ -455,7 +574,8 @@ export default function ProfilePage() {
                   setIsEditingProfile(false);
                   setProfileForm({
                     name: user?.name || '',
-                    email: user?.email || ''
+                    email: user?.email || '',
+                    image: user?.image || null
                   });
                 }}
               >
@@ -468,12 +588,29 @@ export default function ProfilePage() {
           </form>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center">
-              <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-3 mr-4">
-                <UserIcon className="h-6 w-6 text-gray-500 dark:text-gray-300" />
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt={user?.name || "Profile"}
+                    className="h-16 w-16 rounded-full object-cover border-2 border-green-500 shadow-sm"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-xl font-semibold border-2 border-green-500 shadow-sm">
+                    <span>
+                      {user?.name
+                        ? user.name
+                            .split(" ")
+                            .map((word) => word.charAt(0).toUpperCase())
+                            .join("")
+                        : ""}
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">{user?.name}</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{user?.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
               </div>
             </div>

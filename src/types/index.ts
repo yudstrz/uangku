@@ -44,6 +44,7 @@ export interface User {
   password: string;
   preferredCurrency: string;
   isDarkMode: boolean;
+  image?: string | null;
   createdAt: string; // ISO date string
 }
 
