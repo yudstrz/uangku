@@ -13,22 +13,23 @@ export async function GET(req: NextRequest) {
     // Get the month from query params, default to current month
     const { searchParams } = new URL(req.url);
     const month = searchParams.get("month") || new Date().toISOString().slice(0, 7);
+    const clientToday = searchParams.get("today");
 
     // Parse month to get date boundaries
     const [yearStr, monthStr] = month.split("-");
     const year = parseInt(yearStr);
     const monthNum = parseInt(monthStr); // 1-based
 
-    // Calculate today's date string (YYYY-MM-DD) in local time
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    // Calculate today's date string (YYYY-MM-DD)
+    const todayStr = clientToday || new Date().toISOString().slice(0, 10);
+    const [todayYear, todayMonth, todayDay] = todayStr.split("-").map(Number);
 
     // Calculate remaining days in the month (including today)
     const daysInMonth = new Date(year, monthNum, 0).getDate();
-    const today = now.getDate();
+    const today = todayDay;
 
     // Only calculate remaining days if the active month is the current month
-    const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === monthNum;
+    const isCurrentMonth = todayYear === year && todayMonth === monthNum;
     const remainingDays = isCurrentMonth
         ? Math.max(daysInMonth - today + 1, 1) // +1 because we include today, min 1
         : 1; // For past/future months, just show total remaining as-is
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
              LEFT JOIN Category c ON t.categoryId = c.id
              WHERE t.userId = ?
                AND t.type = 'expense'
-               AND t.date = ?
+               AND date(t.date) = ?
              GROUP BY t.categoryId`,
             [userId, todayStr]
         );
@@ -92,9 +93,11 @@ export async function GET(req: NextRequest) {
         const pacing = (budgetsResult.rows as any[]).map((budget) => {
             const budgetAmount = Number(budget.amount) || 0;
             const totalSpent = Number(budget.spent) || 0;
-            const remainingBudget = Math.max(budgetAmount - totalSpent, 0);
-            const dailyLimit = remainingBudget / remainingDays;
             const todaySpent = todayExpenseMap.get(budget.categoryId) || 0;
+
+            const remainingBudget = Math.max(budgetAmount - totalSpent, 0);
+            const remainingBudgetBeforeToday = Math.max(budgetAmount - (totalSpent - todaySpent), 0);
+            const dailyLimit = remainingBudgetBeforeToday / remainingDays;
 
             return {
                 categoryId: budget.categoryId,

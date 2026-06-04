@@ -121,7 +121,9 @@ export default function BudgetPage() {
   const fetchDailySummary = useCallback(async () => {
     try {
       setIsDailySummaryLoading(true);
-      const response = await fetch(`/api/budget/daily-summary?month=${activeMonth}`, {
+      const now = new Date();
+      const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const response = await fetch(`/api/budget/daily-summary?month=${activeMonth}&today=${localToday}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
