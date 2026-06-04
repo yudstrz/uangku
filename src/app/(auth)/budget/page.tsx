@@ -1,15 +1,51 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Budget, Category, formatCurrency } from '@/types';
-import { PlusIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ExclamationCircleIcon, CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 import BudgetForm from './BudgetForm';
 import { Select } from '@/components/form';
 import { showToast } from 'nextjs-toast-notify';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+
+// Types for the daily summary API response
+interface DailyExpenseByCategory {
+  categoryId: string;
+  categoryName: string;
+  categoryColor: string;
+  todaySpent: number;
+}
+
+interface PacingData {
+  categoryId: string;
+  categoryName: string;
+  categoryColor: string;
+  budgetAmount: number;
+  totalSpent: number;
+  remainingBudget: number;
+  remainingDays: number;
+  dailyLimit: number;
+  todaySpent: number;
+  isOverDailyLimit: boolean;
+  isOverBudget: boolean;
+}
+
+interface DailySummaryData {
+  todayExpenses: {
+    total: number;
+    byCategory: DailyExpenseByCategory[];
+  };
+  pacing: PacingData[];
+  meta: {
+    today: string;
+    daysInMonth: number;
+    remainingDays: number;
+    isCurrentMonth: boolean;
+  };
+}
 
 export default function BudgetPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -20,6 +56,8 @@ export default function BudgetPage() {
     new Date().toISOString().slice(0, 7)
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [dailySummary, setDailySummary] = useState<DailySummaryData | null>(null);
+  const [isDailySummaryLoading, setIsDailySummaryLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,6 +116,46 @@ export default function BudgetPage() {
 
     fetchData();
   }, []);
+
+  // Fetch daily summary data when activeMonth changes
+  const fetchDailySummary = useCallback(async () => {
+    try {
+      setIsDailySummaryLoading(true);
+      const response = await fetch(`/api/budget/daily-summary?month=${activeMonth}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (data.error) {
+        console.error('Error fetching daily summary:', data.error);
+      } else {
+        setDailySummary(data);
+      }
+    } catch (error) {
+      console.error('Error fetching daily summary:', error);
+    } finally {
+      setIsDailySummaryLoading(false);
+    }
+  }, [activeMonth]);
+
+  useEffect(() => {
+    fetchDailySummary();
+  }, [fetchDailySummary]);
+
+  // Helper to get pacing data for a specific category
+  const getPacingForCategory = (categoryId: string): PacingData | undefined => {
+    return dailySummary?.pacing.find(p => p.categoryId === categoryId);
+  };
+
+  // Format today's date for display
+  const formatTodayDate = () => {
+    return new Date().toLocaleDateString('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   // Filter budgets by active month
   const filteredBudgets = budgets.filter(budget => budget.month === activeMonth);
@@ -410,6 +488,76 @@ export default function BudgetPage() {
         )}
       </div>
 
+      {/* ===== Ringkasan Harian (Today's Expenses) ===== */}
+      <div className="mt-8">
+        <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+          <CalendarDaysIcon className="h-6 w-6 mr-2 text-blue-500" />
+          Pengeluaran Hari Ini
+        </h2>
+
+        {isDailySummaryLoading ? (
+          <Card>
+            <Skeleton height={28} width={200} className="mb-4" />
+            <Skeleton height={40} width={250} className="mb-6" />
+            <div className="space-y-3">
+              <Skeleton height={44} />
+              <Skeleton height={44} />
+              <Skeleton height={44} />
+            </div>
+          </Card>
+        ) : (
+          <Card>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{formatTodayDate()}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                  {formatCurrency(dailySummary?.todayExpenses.total || 0)}
+                </p>
+              </div>
+              {dailySummary?.meta.isCurrentMonth && (
+                <div className="mt-3 sm:mt-0 flex items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-full">
+                  <ClockIcon className="h-4 w-4 mr-1.5" />
+                  <span>{dailySummary.meta.remainingDays} hari tersisa bulan ini</span>
+                </div>
+              )}
+            </div>
+
+            {dailySummary && dailySummary.todayExpenses.byCategory.length > 0 ? (
+              <div className="space-y-3">
+                {dailySummary.todayExpenses.byCategory
+                  .sort((a, b) => b.todaySpent - a.todaySpent)
+                  .map((item) => (
+                    <div
+                      key={item.categoryId}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className="w-3 h-3 rounded-full mr-3 flex-shrink-0"
+                          style={{ backgroundColor: item.categoryColor }}
+                        />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {item.categoryName}
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(item.todaySpent)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <CalendarDaysIcon className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Belum ada pengeluaran hari ini 🎉
+                </p>
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
+
       {/* Category Budgets */}
       <h2 className="text-xl font-medium text-gray-900 dark:text-white mt-8">Category Budgets</h2>
 
@@ -503,6 +651,93 @@ export default function BudgetPage() {
                     You have exceeded this budget
                   </div>
                 )}
+
+                {/* ===== Budget Pacing / Batas Harian ===== */}
+                {(() => {
+                  const pacing = getPacingForCategory(budget.categoryId);
+                  if (!pacing || !dailySummary?.meta.isCurrentMonth) return null;
+
+                  const isOverLimit = pacing.isOverDailyLimit;
+                  const isNearLimit = pacing.todaySpent > pacing.dailyLimit * 0.8;
+                  const budgetExhausted = pacing.remainingBudget <= 0;
+
+                  return (
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Batas Harian
+                        </span>
+                        {budgetExhausted ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                            Budget Habis
+                          </span>
+                        ) : isOverLimit ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                            Melebihi Batas
+                          </span>
+                        ) : isNearLimit ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                            Hampir Batas
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Aman
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-baseline justify-between">
+                        <p className={`text-lg font-bold ${
+                          budgetExhausted
+                            ? 'text-red-600 dark:text-red-400'
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`}>
+                          {budgetExhausted
+                            ? formatCurrency(0)
+                            : formatCurrency(pacing.dailyLimit)}
+                        </p>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          per hari
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {budgetExhausted
+                          ? 'Budget bulan ini sudah habis terpakai'
+                          : `Sisa ${formatCurrency(pacing.remainingBudget)} ÷ ${pacing.remainingDays} hari`}
+                      </p>
+
+                      {!budgetExhausted && pacing.todaySpent > 0 && (
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-500 dark:text-gray-400">Hari ini</span>
+                            <span className={`font-medium ${
+                              isOverLimit
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-gray-700 dark:text-gray-300'
+                            }`}>
+                              {formatCurrency(pacing.todaySpent)} / {formatCurrency(pacing.dailyLimit)}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full transition-all ${
+                                isOverLimit
+                                  ? 'bg-red-500'
+                                  : isNearLimit
+                                    ? 'bg-yellow-400'
+                                    : 'bg-blue-500'
+                              }`}
+                              style={{
+                                width: `${Math.min((pacing.todaySpent / pacing.dailyLimit) * 100, 100)}%`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </Card>
           ))}
