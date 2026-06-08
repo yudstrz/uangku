@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
                 budgetAmount,
                 totalSpent,
                 remainingBudget,
+                remainingBudgetBeforeToday,
                 remainingDays,
                 dailyLimit,
                 todaySpent,

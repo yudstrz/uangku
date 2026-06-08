@@ -26,6 +26,7 @@ interface PacingData {
   budgetAmount: number;
   totalSpent: number;
   remainingBudget: number;
+  remainingBudgetBeforeToday: number;
   remainingDays: number;
   dailyLimit: number;
   todaySpent: number;
@@ -741,57 +742,59 @@ export default function BudgetPage() {
                         )}
                       </div>
 
-                      <div className={`transition-opacity ${isDisabled ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                        <div className="flex items-baseline justify-between">
-                        <p className={`text-lg font-bold ${
-                          budgetExhausted
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-blue-600 dark:text-blue-400'
-                        }`}>
-                          {budgetExhausted
-                            ? formatCurrency(0)
-                            : formatCurrency(pacing.dailyLimit)}
-                        </p>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          per hari
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {budgetExhausted
-                          ? 'Budget bulan ini sudah habis terpakai'
-                          : `Sisa ${formatCurrency(pacing.remainingBudget)} ÷ ${pacing.remainingDays} hari`}
-                      </p>
-
-                      {!budgetExhausted && pacing.todaySpent > 0 && (
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-500 dark:text-gray-400">Hari ini</span>
-                            <span className={`font-medium ${
-                              isOverLimit
+                      {!isDisabled && (
+                        <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="flex items-baseline justify-between">
+                            <p className={`text-lg font-bold ${
+                              budgetExhausted
                                 ? 'text-red-600 dark:text-red-400'
-                                : 'text-gray-700 dark:text-gray-300'
+                                : 'text-blue-600 dark:text-blue-400'
                             }`}>
-                              {formatCurrency(pacing.todaySpent)} / {formatCurrency(pacing.dailyLimit)}
+                              {budgetExhausted
+                                ? formatCurrency(0)
+                                : formatCurrency(pacing.dailyLimit)}
+                            </p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              per hari
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                            <div
-                              className={`h-1.5 rounded-full transition-all ${
-                                isOverLimit
-                                  ? 'bg-red-500'
-                                  : isNearLimit
-                                    ? 'bg-yellow-400'
-                                    : 'bg-blue-500'
-                              }`}
-                              style={{
-                                width: `${Math.min((pacing.todaySpent / pacing.dailyLimit) * 100, 100)}%`
-                              }}
-                            />
-                          </div>
+
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {budgetExhausted
+                              ? 'Budget bulan ini sudah habis terpakai'
+                              : `Sisa ${formatCurrency(pacing.remainingBudgetBeforeToday)} ÷ ${pacing.remainingDays} hari`}
+                          </p>
+
+                          {!budgetExhausted && pacing.todaySpent > 0 && (
+                            <div className="mt-2">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-500 dark:text-gray-400">Hari ini</span>
+                                <span className={`font-medium ${
+                                  isOverLimit
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : 'text-gray-700 dark:text-gray-300'
+                                }`}>
+                                  {formatCurrency(pacing.todaySpent)} / {formatCurrency(pacing.dailyLimit)}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                <div
+                                  className={`h-1.5 rounded-full transition-all ${
+                                    isOverLimit
+                                      ? 'bg-red-500'
+                                      : isNearLimit
+                                        ? 'bg-yellow-400'
+                                        : 'bg-blue-500'
+                                  }`}
+                                  style={{
+                                    width: `${Math.min((pacing.todaySpent / pacing.dailyLimit) * 100, 100)}%`
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
-                      </div>
                     </div>
                   );
                 })()}

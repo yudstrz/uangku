@@ -18,9 +18,18 @@ export default function TransactionForm({
   onCancel,
   initialData
 }: TransactionFormProps) {
+  // Get local date string for default value (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState<any>({
     type: 'expense',
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateString(),
     categoryId: '',
     accountId: '',
     notes: '',
