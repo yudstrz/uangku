@@ -35,6 +35,7 @@ export interface Budget {
   amount: number;
   month: string; // YYYY-MM format 
   spent: number;
+  isDailyLimitEnabled?: boolean | number;
 }
 
 export interface User {

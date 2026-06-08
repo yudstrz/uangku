@@ -10,6 +10,7 @@ import {
   CurrencyDollarIcon,
   WalletIcon,
   UserCircleIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 
 type NavItem = {
@@ -24,6 +25,7 @@ const navigation: NavItem[] = [
   { name: "Categories", href: "/categories", icon: FolderIcon },
   { name: "Reports", href: "/reports", icon: ChartBarIcon },
   { name: "Budget", href: "/budget", icon: CurrencyDollarIcon },
+  { name: "Wishlist", href: "/wishlist", icon: ShoppingBagIcon },
   { name: "Accounts", href: "/accounts", icon: WalletIcon },
   { name: "Profile", href: "/profile", icon: UserCircleIcon },
 ];

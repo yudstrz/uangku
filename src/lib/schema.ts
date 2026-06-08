@@ -61,8 +61,18 @@ const SCHEMA_STATEMENTS = [
         amount REAL NOT NULL,
         month TEXT NOT NULL,
         spent REAL NOT NULL DEFAULT 0,
+        isDailyLimitEnabled INTEGER NOT NULL DEFAULT 1,
         FOREIGN KEY (userId) REFERENCES User(id),
         FOREIGN KEY (categoryId) REFERENCES Category(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS Wishlist (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+        link TEXT,
+        userId TEXT NOT NULL,
+        createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+        FOREIGN KEY (userId) REFERENCES User(id)
     )`,
 ];
 
@@ -83,6 +93,17 @@ export async function initializeSchema() {
         const errMsg = error?.message || "";
         if (!errMsg.includes("duplicate column") && !errMsg.includes("already exists")) {
             console.warn("Migration notice: failed to add 'image' column:", errMsg);
+        }
+    }
+    
+    // Migration: Add isDailyLimitEnabled column to Budget table
+    try {
+        await db.execute("ALTER TABLE Budget ADD COLUMN isDailyLimitEnabled INTEGER DEFAULT 1");
+        console.log("Migration: Added 'isDailyLimitEnabled' column to 'Budget' table.");
+    } catch (error: any) {
+        const errMsg = error?.message || "";
+        if (!errMsg.includes("duplicate column") && !errMsg.includes("already exists")) {
+            console.warn("Migration notice: failed to add 'isDailyLimitEnabled' column:", errMsg);
         }
     }
     
