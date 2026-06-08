@@ -11,6 +11,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -93,7 +94,7 @@ export default function ProfilePage() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -500,9 +501,11 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 pb-4 border-b border-gray-100 dark:border-gray-700">
               <div className="relative">
                 {profileForm.image ? (
-                  <img
+                  <Image
                     src={profileForm.image}
                     alt="Preview"
+                    width={80}
+                    height={80}
                     className="h-20 w-20 rounded-full object-cover border-2 border-green-500 shadow-md"
                   />
                 ) : (
@@ -591,9 +594,11 @@ export default function ProfilePage() {
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 {user?.image ? (
-                  <img
+                  <Image
                     src={user.image}
                     alt={user?.name || "Profile"}
+                    width={64}
+                    height={64}
                     className="h-16 w-16 rounded-full object-cover border-2 border-green-500 shadow-sm"
                   />
                 ) : (

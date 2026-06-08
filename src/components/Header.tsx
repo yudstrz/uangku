@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bars3Icon, BellIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { showToast } from "nextjs-toast-notify";
+import Image from "next/image";
 
 type HeaderProps = {
   toggleSidebar: () => void;
@@ -113,9 +114,11 @@ export default function Header({ toggleSidebar }: HeaderProps) {
               <Link href="/profile">
                 <div className="flex items-center space-x-2 cursor-pointer">
                   {user?.image ? (
-                    <img 
+                    <Image 
                       src={user.image} 
                       alt={user?.name || "User Avatar"} 
+                      width={32}
+                      height={32}
                       className="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700" 
                     />
                   ) : (

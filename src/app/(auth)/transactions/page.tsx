@@ -127,6 +127,7 @@ export default function TransactionsPage() {
     }
 
     setTransactions(filteredData);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, filterCategory, filterDateFrom, filterDateTo, filterAmount]);
 
   // Handle new transaction

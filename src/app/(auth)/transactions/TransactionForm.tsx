@@ -92,6 +92,7 @@ export default function TransactionForm({
 
   useEffect(() => {
     fetchAndFilterCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.type]);
 
   useEffect(() => {

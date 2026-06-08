@@ -312,7 +312,7 @@ export default function WishlistPage() {
                   No matches found
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-sm">
-                  We couldn't find any wishlist items matching "{searchQuery}".
+                  We couldn&apos;t find any wishlist items matching &quot;{searchQuery}&quot;.
                 </p>
               </Card>
             )}
