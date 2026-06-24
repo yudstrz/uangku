@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Card from '@/components/Card';
 import ChartComponent from '@/components/ChartComponent';
+import DataTable from '@/components/DataTable';
 import { Account, Category, formatCurrency, Transaction } from '@/types';
 import {
   ArrowUpIcon,
@@ -337,55 +338,51 @@ export default function Dashboard() {
             <Skeleton height={60} count={5} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {recentTransactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                      {formatDate(transaction.date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                      {getCategoryName(transaction.categoryId)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                      {transaction.notes || 'No description'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span className={transaction.type === 'income' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}>
-                        {formatCurrency(transaction.amount)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        transaction.type === 'income'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                      }`}>
-                        {transaction.type === 'income' ? 'Income' : 'Expense'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {recentTransactions.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                      No transactions found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={recentTransactions}
+            keyExtractor={(item) => item.id}
+            disablePagination={true}
+            emptyMessage="No transactions found"
+            columns={[
+              {
+                key: 'date',
+                header: 'Date',
+                render: (transaction: any) => formatDate(transaction.date)
+              },
+              {
+                key: 'categoryId',
+                header: 'Category',
+                render: (transaction: any) => getCategoryName(transaction.categoryId)
+              },
+              {
+                key: 'notes',
+                header: 'Description',
+                render: (transaction: any) => transaction.notes || 'No description'
+              },
+              {
+                key: 'amount',
+                header: 'Amount',
+                render: (transaction: any) => (
+                  <span className={transaction.type === 'income' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}>
+                    {formatCurrency(transaction.amount)}
+                  </span>
+                )
+              },
+              {
+                key: 'type',
+                header: 'Type',
+                render: (transaction: any) => (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    transaction.type === 'income'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                  }`}>
+                    {transaction.type === 'income' ? 'Income' : 'Expense'}
+                  </span>
+                )
+              }
+            ]}
+          />
         )}
       </Card>
     </div>

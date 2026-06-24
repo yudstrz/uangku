@@ -5,6 +5,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Select } from '@/components/form';
 import ChartComponent from '@/components/ChartComponent';
+import DataTable from '@/components/DataTable';
 import { Category, formatCurrency } from '@/types';
 import { DocumentChartBarIcon } from '@heroicons/react/24/outline';
 import { showToast } from '@/utils/toast';
@@ -455,75 +456,64 @@ export default function ReportsPage() {
 
       {/* Detailed Breakdown Table */}
       <Card title="Detailed Breakdown">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Category
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Type
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  % of Total
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {selectedReport?.categories.map((category: any) => {
+        <DataTable
+          data={selectedReport?.categories || []}
+          keyExtractor={(item) => item.id}
+          disablePagination={true}
+          columns={[
+            {
+              key: 'name',
+              header: 'Category',
+              render: (category: any) => {
                 const categoryInfo = categories?.find(c => c.id === category.id);
+                return (
+                  <div className="flex items-center">
+                    <div
+                      className="w-4 h-4 rounded-full mr-2"
+                      style={{ backgroundColor: categoryInfo?.color || '#gray' }}
+                    />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {category.name}
+                    </span>
+                  </div>
+                );
+              }
+            },
+            {
+              key: 'type',
+              header: 'Type',
+              render: (category: any) => (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.type === 'income'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                  }`}>
+                  {category.type === 'income' ? 'Income' : 'Expense'}
+                </span>
+              )
+            },
+            {
+              key: 'amount',
+              header: 'Amount',
+              render: (category: any) => formatCurrency(category.amount)
+            },
+            {
+              key: 'percentage',
+              header: '% of Total',
+              render: (category: any) => {
                 const totalForType = category.type === 'income' ?
                   selectedReport.totalIncome : selectedReport.totalExpense;
                 const percentage = totalForType > 0 ?
                   ((category.amount / totalForType) * 100).toFixed(1) : '0';
-
-                return (
-                  <tr key={category.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div
-                          className="w-4 h-4 rounded-full mr-2"
-                          style={{ backgroundColor: categoryInfo?.color || '#gray' }}
-                        />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {category.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.type === 'income'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        }`}>
-                        {category.type === 'income' ? 'Income' : 'Expense'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(category.amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {percentage}%
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th scope="row" colSpan={2} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Total
-                </th>
-                <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(selectedReport?.totalIncome - selectedReport?.totalExpense)}
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+                return `${percentage}%`;
+              }
+            }
+          ]}
+        />
+        <div className="mt-4 px-6 py-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between items-center border border-gray-200 dark:border-gray-700">
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Net</span>
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
+            {formatCurrency((selectedReport?.totalIncome || 0) - (selectedReport?.totalExpense || 0))}
+          </span>
         </div>
       </Card>
     </div>
