@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Category, TransactionType } from '@/types';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryForm from './CategoryForm';
 import Skeleton from 'react-loading-skeleton';
@@ -234,7 +234,7 @@ export default function CategoriesPage() {
           <button
             onClick={() => setActiveTab('expense')}
             className={`${activeTab === 'expense'
-              ? 'border-green-500 text-green-600 dark:text-green-400'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >
@@ -243,7 +243,7 @@ export default function CategoriesPage() {
           <button
             onClick={() => setActiveTab('income')}
             className={`${activeTab === 'income'
-              ? 'border-green-500 text-green-600 dark:text-green-400'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import { PlusIcon, PencilIcon, TrashIcon, LinkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import WishlistForm from './WishlistForm';
 import Skeleton from 'react-loading-skeleton';
@@ -234,7 +234,7 @@ export default function WishlistPage() {
             placeholder="Search wishlist..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-colors"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
           />
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function WishlistPage() {
                   </div>
                 </div>
                 
-                <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-4 relative z-10">
+                <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 relative z-10">
                   {formatCurrency(item.price)}
                 </div>
 
@@ -299,7 +299,7 @@ export default function WishlistPage() {
                   </div>
                 )}
                 
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-green-500 dark:bg-green-600 rounded-full opacity-5 pointer-events-none transition-transform group-hover:scale-150 duration-500 ease-in-out"></div>
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-500 dark:bg-blue-600 rounded-full opacity-5 pointer-events-none transition-transform group-hover:scale-150 duration-500 ease-in-out"></div>
               </Card>
             ))}
 

@@ -39,7 +39,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             className={`block ${fullWidth ? 'w-full' : ''} pl-3 pr-10 py-2 text-base border ${
               error
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
             } rounded-md shadow-sm focus:outline-none sm:text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white appearance-none ${className}`}
             onChange={handleChange}
             {...props}

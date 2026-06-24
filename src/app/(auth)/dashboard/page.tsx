@@ -264,7 +264,7 @@ export default function Dashboard() {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+            <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
               <div className="flex items-center">
                 <div className="mr-3 rounded-full p-2 bg-white bg-opacity-20">
                   <ArrowUpIcon className="h-6 w-6" />
@@ -361,14 +361,14 @@ export default function Dashboard() {
                       {transaction.notes || 'No description'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span className={transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                      <span className={transaction.type === 'income' ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}>
                         {formatCurrency(transaction.amount)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         transaction.type === 'income'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
                           : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                       }`}>
                         {transaction.type === 'income' ? 'Income' : 'Expense'}

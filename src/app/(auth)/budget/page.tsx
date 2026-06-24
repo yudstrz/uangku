@@ -7,7 +7,7 @@ import { Budget, Category, formatCurrency } from '@/types';
 import { PlusIcon, ExclamationCircleIcon, CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 import BudgetForm from './BudgetForm';
 import { Select } from '@/components/form';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -488,7 +488,7 @@ export default function BudgetPage() {
                         ? 'bg-red-600 dark:bg-red-500'
                         : getBudgetPercentage(totalBudget, totalSpent) > 80
                           ? 'bg-yellow-400 dark:bg-yellow-500'
-                          : 'bg-green-600 dark:bg-green-500'
+                          : 'bg-blue-600 dark:bg-blue-500'
                         }`}
                       style={{ width: `${getBudgetPercentage(totalBudget, totalSpent)}%` }}
                     ></div>
@@ -501,7 +501,7 @@ export default function BudgetPage() {
               <div className="flex flex-col">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Remaining Budget</h3>
                 <p className={`text-3xl font-bold mt-2 ${totalBudget - totalSpent > 0
-                  ? 'text-green-600 dark:text-green-400'
+                  ? 'text-blue-600 dark:text-blue-400'
                   : 'text-red-600 dark:text-red-400'
                   }`}>
                   {formatCurrency(totalBudget - totalSpent)}
@@ -514,7 +514,7 @@ export default function BudgetPage() {
                       <span>You have exceeded your total budget for {formatMonth(activeMonth, "activeMonth")}</span>
                     </div>
                   ) : (
-                    <div className="bg-green-100 dark:bg-green-900 p-3 rounded-md flex items-center text-green-800 dark:text-green-300 w-full">
+                    <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-md flex items-center text-blue-800 dark:text-blue-300 w-full">
                       <span>You are on track with your budget for {formatMonth(activeMonth, "activeMonthh")}</span>
                     </div>
                   )}
@@ -662,7 +662,7 @@ export default function BudgetPage() {
                       ? 'bg-red-600 dark:bg-red-500'
                       : getBudgetPercentage(budget.amount, budget.spent) > 80
                         ? 'bg-yellow-400 dark:bg-yellow-500'
-                        : 'bg-green-600 dark:bg-green-500'
+                        : 'bg-blue-600 dark:bg-blue-500'
                       }`}
                     style={{ width: `${getBudgetPercentage(budget.amount, budget.spent)}%` }}
                   ></div>
@@ -671,7 +671,7 @@ export default function BudgetPage() {
                 <div className="flex justify-between text-sm">
                   <span className={`font-medium ${isOverBudget(budget.amount, budget.spent)
                     ? 'text-red-600 dark:text-red-400'
-                    : 'text-green-600 dark:text-green-400'
+                    : 'text-blue-600 dark:text-blue-400'
                     }`}>
                     {isOverBudget(budget.amount, budget.spent)
                       ? `${formatCurrency(budget.spent - budget.amount)} over budget`
@@ -709,7 +709,7 @@ export default function BudgetPage() {
                           </span>
                           <button
                             onClick={() => toggleDailyLimit(budget)}
-                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${!isDisabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${!isDisabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                             aria-label="Toggle daily limit"
                           >
                             <span
@@ -731,7 +731,7 @@ export default function BudgetPage() {
                             Hampir Batas
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                             Aman
                           </span>
                         ))}

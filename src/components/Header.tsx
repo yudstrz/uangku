@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bars3Icon, BellIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { showToast } from "nextjs-toast-notify";
+import { showToast } from '@/utils/toast';
 import Image from "next/image";
 
 type HeaderProps = {

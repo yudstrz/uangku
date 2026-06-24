@@ -40,7 +40,7 @@ export default function Navigation() {
           href="/dashboard"
           className="flex items-center mb-5 px-2 py-4"
         >
-          <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+          <CurrencyDollarIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           <div className="flex flex-col ml-3">
             <span className="text-xl font-bold text-gray-900 dark:text-white leading-none">
               uangku
@@ -59,14 +59,14 @@ export default function Navigation() {
                 href={item.href}
                 className={`${
                   isActive
-                    ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 } group flex items-center px-3 py-2 text-sm font-medium rounded-md`}
               >
                 <item.icon
                   className={`${
                     isActive
-                      ? "text-green-600 dark:text-green-300"
+                      ? "text-blue-600 dark:text-blue-300"
                       : "text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-300"
                   } mr-3 h-5 w-5 flex-shrink-0`}
                   aria-hidden="true"

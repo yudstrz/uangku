@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./Providers";
 import PWARegistration from "@/components/PWARegistration";
+import { Toaster } from 'react-hot-toast';
 
 
 const inter = Inter({
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#16a34a",
+  themeColor: "#2563eb",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -69,6 +70,7 @@ export default function RootLayout({
         className={`${inter.variable} antialiased min-h-screen bg-gray-50 dark:bg-gray-900`}
       >
         <PWARegistration />
+        <Toaster position="top-right" />
         <Providers>
           {children}
         </Providers>

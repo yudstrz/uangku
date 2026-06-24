@@ -6,7 +6,7 @@ import Button from '@/components/Button';
 import { Account, formatCurrency } from '@/types';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import AccountForm from './AccountForm';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -219,7 +219,7 @@ export default function AccountsPage() {
   const getAccountTypeColor = (type: string) => {
     const colorMap: Record<string, string> = {
       'bank': 'bg-blue-500',
-      'cash': 'bg-green-500',
+      'cash': 'bg-blue-500',
       'credit': 'bg-red-500',
       'investment': 'bg-purple-500',
       'other': 'bg-gray-500',

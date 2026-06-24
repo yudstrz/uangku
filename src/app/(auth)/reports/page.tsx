@@ -7,7 +7,7 @@ import { Select } from '@/components/form';
 import ChartComponent from '@/components/ChartComponent';
 import { Category, formatCurrency } from '@/types';
 import { DocumentChartBarIcon } from '@heroicons/react/24/outline';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { jsPDF } from 'jspdf';
@@ -365,7 +365,7 @@ export default function ReportsPage() {
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+        <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
           <div className="flex flex-col items-center">
             <h3 className="text-lg font-medium">Total Income</h3>
             <p className="text-2xl font-bold">{formatCurrency(selectedReport?.totalIncome)}</p>
@@ -395,7 +395,7 @@ export default function ReportsPage() {
           <div className="flex space-x-2 border border-gray-200 dark:border-gray-700 rounded-md p-1">
             <button
               className={`px-3 py-1 rounded-md text-sm ${chartType === 'bar'
-                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
                 : 'text-gray-600 dark:text-gray-300'
                 }`}
               onClick={() => setChartType('bar')}
@@ -404,7 +404,7 @@ export default function ReportsPage() {
             </button>
             <button
               className={`px-3 py-1 rounded-md text-sm ${chartType === 'line'
-                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
                 : 'text-gray-600 dark:text-gray-300'
                 }`}
               onClick={() => setChartType('line')}
@@ -496,7 +496,7 @@ export default function ReportsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.type === 'income'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                         }`}>
                         {category.type === 'income' ? 'Income' : 'Expense'}

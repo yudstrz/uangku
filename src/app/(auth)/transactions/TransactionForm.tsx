@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '@/components/Button';
 import { Input, Select, TextArea, FormGroup } from '@/components/form';
 import { Account, Category, Transaction } from '@/types';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 interface TransactionFormProps {

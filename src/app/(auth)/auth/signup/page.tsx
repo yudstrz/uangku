@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import { useSession } from 'next-auth/react';
 
 export default function SignUpPage() {
@@ -128,8 +128,8 @@ export default function SignUpPage() {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
-            <CurrencyDollarIcon className="h-10 w-10 text-green-600 dark:text-green-400" />
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900 p-3">
+            <CurrencyDollarIcon className="h-10 w-10 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -139,7 +139,7 @@ export default function SignUpPage() {
           Already have an account?{' '}
           <Link
             href="/auth/signin"
-            className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Sign in
           </Link>
@@ -169,7 +169,7 @@ export default function SignUpPage() {
                   value={formData.name}
                   onChange={handleChange}
                   className={`appearance-none block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'
-                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
+                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
                   placeholder="John Doe"
                 />
                 {errors.name && (
@@ -192,7 +192,7 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={handleChange}
                   className={`appearance-none block w-full px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'
-                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
+                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
                   placeholder="your@email.com"
                 />
                 {errors.email && (
@@ -215,7 +215,7 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`appearance-none block w-full px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'
-                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
+                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
                   placeholder="••••••••"
                 />
                 {errors.password && (
@@ -238,7 +238,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={`appearance-none block w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'
-                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
+                    } rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400`}
                   placeholder="••••••••"
                 />
                 {errors.confirmPassword && (
@@ -255,21 +255,21 @@ export default function SignUpPage() {
                 type="checkbox"
                 checked={formData.agreeToTerms}
                 onChange={handleChange}
-                className={`h-4 w-4 ${errors.agreeToTerms ? 'border-red-300 text-red-600' : 'border-gray-300 text-green-600'
-                  } focus:ring-green-500 rounded dark:border-gray-700 dark:bg-gray-700`}
+                className={`h-4 w-4 ${errors.agreeToTerms ? 'border-red-300 text-red-600' : 'border-gray-300 text-blue-600'
+                  } focus:ring-blue-500 rounded dark:border-gray-700 dark:bg-gray-700`}
               />
               <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 I agree to the{' '}
                 <Link
                   href="#"
-                  className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Terms of Service
                 </Link>{' '}
                 and{' '}
                 <Link
                   href="#"
-                  className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Privacy Policy
                 </Link>

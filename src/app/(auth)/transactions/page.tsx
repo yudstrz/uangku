@@ -8,7 +8,7 @@ import { formatCurrency, Transaction } from "@/types";
 import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import TransactionForm from "./TransactionForm";
 import { Input, Select, FormGroup } from "@/components/form";
-import { showToast } from "nextjs-toast-notify";
+import { showToast } from '@/utils/toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -337,7 +337,7 @@ export default function TransactionsPage() {
       ) : (
         <span
           className={
-            transaction.type === "income" ? "text-green-600" : "text-red-600"
+            transaction.type === "income" ? "text-blue-600" : "text-red-600"
           }
         >
           {formatCurrency(transaction.amount)}
@@ -353,7 +353,7 @@ export default function TransactionsPage() {
       ) : (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.type === "income"
-            ? "bg-green-100 text-green-800"
+            ? "bg-blue-100 text-blue-800"
             : "bg-red-100 text-red-800"
             }`}
         >

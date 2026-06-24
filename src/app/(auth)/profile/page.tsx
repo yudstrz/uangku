@@ -5,7 +5,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Input, Select, FormGroup } from '@/components/form';
 import { UserIcon, MoonIcon, SunIcon, CogIcon } from '@heroicons/react/24/outline';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 import { User } from '@/types';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -506,10 +506,10 @@ export default function ProfilePage() {
                     alt="Preview"
                     width={80}
                     height={80}
-                    className="h-20 w-20 rounded-full object-cover border-2 border-green-500 shadow-md"
+                    className="h-20 w-20 rounded-full object-cover border-2 border-blue-500 shadow-md"
                   />
                 ) : (
-                  <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-semibold border-2 border-green-500 shadow-md">
+                  <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-semibold border-2 border-blue-500 shadow-md">
                     <span>
                       {profileForm.name
                         ? profileForm.name
@@ -522,7 +522,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="flex flex-col items-center sm:items-start space-y-2">
-                <label className="cursor-pointer bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 text-center shadow-sm">
+                <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 text-center shadow-sm">
                   Upload Photo
                   <input
                     type="file"
@@ -599,10 +599,10 @@ export default function ProfilePage() {
                     alt={user?.name || "Profile"}
                     width={64}
                     height={64}
-                    className="h-16 w-16 rounded-full object-cover border-2 border-green-500 shadow-sm"
+                    className="h-16 w-16 rounded-full object-cover border-2 border-blue-500 shadow-sm"
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-xl font-semibold border-2 border-green-500 shadow-sm">
+                  <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-xl font-semibold border-2 border-blue-500 shadow-sm">
                     <span>
                       {user?.name
                         ? user.name
@@ -670,7 +670,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleDarkModeToggle}
-                  className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isDarkMode ? 'bg-green-600' : 'bg-gray-200'
+                  className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-200'
                     }`}
                   aria-pressed={isDarkMode}
                 >
@@ -689,7 +689,7 @@ export default function ProfilePage() {
                       className={`absolute inset-0 h-full w-full flex items-center justify-center transition-opacity ${isDarkMode ? 'opacity-100 ease-in duration-200' : 'opacity-0 ease-out duration-100'
                         }`}
                     >
-                      <MoonIcon className="h-3 w-3 text-green-600" />
+                      <MoonIcon className="h-3 w-3 text-blue-600" />
                     </span>
                   </span>
                 </button>

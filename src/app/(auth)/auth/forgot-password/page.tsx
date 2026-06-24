@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/Button';
-import { showToast } from 'nextjs-toast-notify';
+import { showToast } from '@/utils/toast';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -56,8 +56,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
-            <CurrencyDollarIcon className="h-10 w-10 text-green-600 dark:text-green-400" />
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900 p-3">
+            <CurrencyDollarIcon className="h-10 w-10 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -78,12 +78,12 @@ export default function ForgotPasswordPage() {
 
           {success ? (
             <div className="text-center">
-              <div className="mb-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded relative" role="alert">
+              <div className="mb-4 bg-blue-100 dark:bg-blue-900 border border-blue-400 dark:border-blue-700 text-blue-700 dark:text-blue-300 px-4 py-3 rounded relative" role="alert">
                 <span className="block sm:inline">Password reset email sent! Check your inbox for further instructions.</span>
               </div>
               <Link
                 href="/auth/signin"
-                className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Return to sign in
               </Link>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
               <div className="text-center">
                 <Link
                   href="/auth/signin"
-                  className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Back to sign in
                 </Link>

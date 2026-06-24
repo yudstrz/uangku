@@ -14,7 +14,7 @@ interface CategoryFormProps {
 
 // Color palette for category colors
 const colorPalette = [
-  '#34D399', // green
+  '#3B82F6', // blue
   '#F87171', // red
   '#60A5FA', // blue
   '#A78BFA', // purple
@@ -132,7 +132,7 @@ export default function CategoryForm({
                 key={color}
                 type="button"
                 onClick={() => handleColorSelect(color)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.color === color ? 'ring-2 ring-offset-2 ring-green-500' : ''
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.color === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''
                   }`}
                 style={{ backgroundColor: color }}
               >
